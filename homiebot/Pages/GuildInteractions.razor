@@ -1,0 +1,79 @@
+﻿@page "/GuildInteractions"
+
+@using DSharpPlus.Entities;
+@using DSharpPlus;
+
+<h1 class="active">Guild Interactions</h1>
+
+<main>
+    <section id="data">
+        <div id="data-list">
+            <div class="data" id="sendmessage">
+                <input @bind="GuildId" placeholder="Enter GuildId..." />
+                <input @bind="ChannelId" placeholder="Enter ChannelId..." />
+                <input @bind="Message" placeholder="Enter Message..." />
+                <button class="btn btn-primary" @onclick="Sendmessage">Send Message</button>
+            </div>
+            <div class="data" id="sendembed">
+                <input @bind="GuildId" placeholder="Enter GuildId..." />
+                <input @bind="ChannelId" placeholder="Enter ChannelId..." />
+                <input @bind="Title" placeholder="Enter Title..." />
+                <input @bind="UserId" placeholder="Enter userid..." />
+                <textarea @bind="Message" placeholder="Enter Message..." rows="50" cols="30" />
+                <button class="btn btn-primary" @onclick="SendEmbed">Send Embed</button>
+            </div>
+        </div>
+    </section>
+</main>
+
+@code {
+
+    string ChannelId { get; set; }
+    string GuildId { get; set; }
+    string Message { get; set; }
+    string UserId { get; set; }
+    string Title { get; set; }
+    DiscordClient client { get; set; }
+    DiscordColor embedcolor = DiscordColor.DarkRed;
+
+
+    private async Task Sendmessage()
+    {
+        var channelid = ulong.Parse(ChannelId, System.Globalization.NumberStyles.Integer);
+        var guildid = ulong.Parse(GuildId, System.Globalization.NumberStyles.Integer);
+
+        var guild = await bot.client.GetGuildAsync(guildid);
+        await guild.GetChannel(channelid).SendMessageAsync(Message);
+
+    }
+
+    protected override void OnInitialized()
+    {
+        client = bot.client;
+    }
+
+    private async Task SendEmbed()
+    {
+        var channelid = ulong.Parse(ChannelId, System.Globalization.NumberStyles.Integer);
+        var guildid = ulong.Parse(GuildId, System.Globalization.NumberStyles.Integer);
+        var userid = ulong.Parse(UserId, System.Globalization.NumberStyles.Integer);
+
+        var guild = await client.GetGuildAsync(guildid);
+        var member = await guild.GetMemberAsync(userid);
+
+        var embed = new DiscordEmbedBuilder
+        {
+            Description = Message,
+            Title = Title,
+            Color = embedcolor,
+            Author = new DiscordEmbedBuilder.EmbedAuthor
+            {
+                Name = member.DisplayName,
+                IconUrl = member.AvatarUrl
+            },
+        };
+
+        await guild.GetChannel(channelid).SendMessageAsync(embed: embed);
+    }
+
+}

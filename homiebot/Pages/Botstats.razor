@@ -1,0 +1,68 @@
+﻿@page "/botstats"
+
+@using DSharpPlus;
+
+<h1>Bot Stats</h1>
+
+<main>
+    <section id="data">
+        <div id="data-list">
+            @if (guilds == null)
+            {
+                <p><em>Something went wrong, try again...</em></p>
+            }
+            else
+            {
+                @foreach (var guild in guilds)
+                {
+                    <div class="data" id="server-@guild.Value.Id.ToString()">
+                        <img src="@guild.Value.IconUrl" />
+                        <p>Guild Name: @guild.Value.Name</p>
+                        <p>Guild Id: @guild.Value.Id</p>
+                        @if (guild.Value.SystemChannel == null)
+                        {
+                            <p><em>No system channel found</em></p>
+                        }
+                        else
+                        {
+                            <p>System channel: @guild.Value.SystemChannel.Name</p>
+                            <p>Channel Id: @guild.Value.SystemChannel.Id</p>
+                        }
+                    </div>
+                }
+            }
+
+            <div class="data" id="bot-stats">
+                <img src="@avatarurl" height="128" width="128"/>
+                <p>Name: @bot.client.CurrentApplication.Name</p>
+                <p>Ping: @clientping</p>
+                <p>Intents: @bot.client.Intents.ToString()</p>
+            </div>
+            
+        </div>
+        <button class="btn btn-primary" @onclick="Load">Load All Guilds</button>
+    </section>
+</main>
+
+
+
+@code {
+    int clientping { get; set; }
+    IReadOnlyDictionary<ulong, DSharpPlus.Entities.DiscordGuild> guilds { get; set; }
+    string avatarurl { get; set; }
+    DiscordClient client = bot.client;
+
+    private void Load()
+    {
+        guilds = client.Guilds;
+    }
+
+    protected override void OnInitialized()
+    {
+        guilds = bot.client.Guilds;
+        clientping = bot.client.Ping;
+        avatarurl = bot.client.CurrentUser.AvatarUrl;
+    }
+
+
+}
